@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script>
+        const vnodeType = {
+            HTML: 'HTML',
+            TEXT: 'TEXT',
+            COMPONENT: 'COMPONENT'
+        }
+        const childType = {
+            EMPTY: "EMPTY",
+            SINGLE: "SINGLE",
+            MANY: "MANY"
+        }
+
+        function createElement(tag, data = {}, children = null) {
+            let flag;
+            if (typeof tag == "string") {
+                flag = vnodeType.HTML
+            } else if (typeof tag == "function") {
+                flag = vnodeType.COMPONENT;
+                console.log(11);
+
+            } else {
+                flag = vnodeType.TEXT
+            }
+            // 给孩子添加标志
+            let childFlags = null;
+            if (Array.isArray(children)) {
+                const {
+                    length
+                } = children;
+                if (length === 0) {
+                    childFlags = childType.EMPTY;
+                } else {
+                    childFlags = childType.MANY;
+                }
+            } else if (children == null) {
+                childFlags = childType.EMPTY;
+            } else {
+                //文本字符串被赋值到children上了
+                childFlags = childType.SINGLE;
+                children = createTextVNode(children + '');
+            }
+
+            //填写孩子的标志
+
+            return {
+                el: null,
+                flag, //vnode的类型
+                tag, //标签
+                data,
+                children,
+                childFlags, //孩子标志
+
+            }
+        }
+
+
+        function render(vnode, container) {
+            const preVnode = container.vnode;
+            //首先挂载
+            if (preVnode == null) {
+                mount(vnode, container);
+            }
+            //再次挂载
+            else {
+                patch(preVnode, vnode, container)
+            }
+            container.vnode = vnode;
+        }
+
+        function patch(preVnode, newVnode, container) {
+            // 拿标志看看值不值得比较
+            const preFlag = preVnode.flag;
+            const newFlag = newVnode.flag;
+            if (preFlag !== newFlag) {
+                // vnode类型不同直接替换
+                replaceVnode(preVnode, newVnode, container);
+            }
+            // 都是元素vnode
+            else if (newVnode.flag === vnodeType.HTML) {
+                patchElement(preVnode, newVnode, container);
+            }
+            // 都是文本Vnode
+            else if (newVnode.flag = vnodeType.TEXT) {
+                patchText(preVnode, newVnode);
+            }
+        }
+        // 新旧Vnode直接替换
+        function replaceVnode(preVnode, newVnode, container) {
+            // 把原来的移出
+            container.removeChild(preVnode.el);
+            // 新的挂载
+            mount(newVnode, container);
+        }
+        // 新旧Vnode文本替换
+        function patchText(preVnode, newVnode) {
+            // 拿dom节点
+            const el = (newVnode.el = preVnode.el);
+            // 新旧文本不一样的时候即会更新
+            if (newVnode.children !== preVnode.children) {
+                el.nodeValue = newVnode.children;
+            }
+        }
+
+        // diff的核心，新旧元素类型的Vnode更新
+        function patchElement(preVnode, newVnode, container) {
+            // 先判断新旧Vnode的tag，看是否值得深入比较
+            if (preVnode.tag !== newVnode.tag) {
+                // 直接替换
+                patchElement(preVnode, newVnode, container);
+                return;
+            }
+            // 拿老的dom节点
+            const el = (newVnode.el = preVnode.el);
+
+            // 先开始更新属性
+            const preData = preVnode.data;
+            const newData = newVnode.data;
+
+            if (newData) {
+                for (let key in newData) {
+                    const preValue = preData[key];
+                    const newValue = newData[key];
+                    patchData(el, key, preValue, newValue)
+                }
+            }
+
+            if (preData) {
+                for (let k in preData) {
+                    const preValue = preData[k];
+                    if (preValue && !newData.hasOwnProperty(k)) {
+                        patchData(el, k, preValue, null)
+                    }
+                }
+            }
+
+            // 接下来更新子节点
+            patchChildren(
+                preVnode.childFlags,
+                newVnode.childFlags,
+                preVnode.children,
+                newVnode.children,
+                el)
+        }
+
+        function patchChildren(prevChildFlags, newChildFlags, prevChildren, newChildren, container) {
+
+            // 接下来需要对比9种情况
+            switch (prevChildFlags) {
+                // 老的没有孩子
+                case childType.EMPTY:
+                    // 新的有0个
+                    if (newChildFlags == childType.EMPTY) {
+                        //都没有则不支持操作
+                    }
+                    // 新的有一个
+                    else if (newChildFlags == childType.SINGLE) {
+                        // 把这个新的挂上去
+                        mount(newChildren, container)
+                    }
+                    // 新的有多个
+                    else {
+                        // 把新的挨个挂上去
+                        newChildren.forEach((chil) => {
+                            mount(chil, container);
+                        })
+                    }
+
+                    break;
+
+                    // 老的有一个
+                case childType.SINGLE:
+                    // 新的有0个
+                    if (newChildFlags == childType.EMPTY) {
+                        // 把老的干掉
+                        container.removeChild(prevChildren.el);
+                    }
+                    // 新的有一个
+                    else if (newChildFlags == childType.SINGLE) {
+                        patch(prevChildren, newChildren, container);
+                    }
+                    // 新的有多个
+                    else {
+                        // 老的干掉
+                        container.removeChild(prevChildren.el);
+                        // 新的挂载上去
+                        newChildren.forEach((chi) => {
+                            mount(chi, container);
+                        })
+                    }
+                    break;
+
+                    // 老的有多个
+                default:
+                    // 新的有0个
+                    if (newChildFlags == childType.EMPTY) {
+                        // 老的全部砍掉
+                        prevChildren.forEach((chi) => {
+                            container.removeChild(chi.el);
+                        })
+                    }
+                    // 新的有一个
+                    else if (newChildFlags == childType.SINGLE) {
+                        // 老的全部砍掉
+                        prevChildren.forEach((chi) => {
+                                container.removeChild(chi.el);
+                            })
+                            // 新的挂上去
+                        mount(newChildren, container);
+                    }
+                    // 新的有多个
+                    else {
+                        // diff算法的核心
+                        let lastIndex = 0;
+                        for (let i = 0; i < newChildren.length; i++) {
+                            // 拿到每个孩子
+                            const newVnode = newChildren[i];
+                            let j = 0;
+                            find = false;
+                            // 遍历老的
+                            for (j; j < prevChildren.length; j++) {
+                                // 拿每个老的
+                                const preVnode = prevChildren[i];
+                                if (newVnode.key == preVnode.key) {
+                                    find = true;
+                                    patch(preVnode, newVnode, container);
+                                    // 判断需不需要移到位置
+                                    if (j < lastIndex) {
+                                        // 要移动
+                                        const refNode = newChildren[i - 1].el.nextSibling;
+                                        container.insertBefore(preVnode.el, refNode)
+                                    } else {
+                                        lastIndex = j;
+                                    }
+
+                                }
+                            }
+                            // 如果在老的里面没有找到，则要直接挂新的
+                            if (!find) {
+                                const refNode =
+                                    i - 1 < 0 ?
+                                    prevChildren[0].el :
+                                    newChildren[i - 1].el.nextSibling
+
+                                mount(newVnode, container, refNode)
+                            }
+
+                        }
+
+                        // 移除不再需要的节点
+                        for (let i = 0; i < prevChildren.length; i++) {
+                            const preVnode = prevChildren[i];
+                            const has = newChildren.find(
+                                newVNode => newVNode.key === preVnode.key
+                            )
+                            if (!has) {
+                                container.removeChild(preVnode.el)
+                            }
+                        }
+                    }
+            }
+
+
+        }
+
+        function mount(vnode, container) {
+            const {
+                flag
+            } = vnode;
+            // 元素类型
+            if (flag == vnodeType.HTML) {
+                mountElement(vnode, container);
+            }
+            // 文本类型
+            if (flag == vnodeType.TEXT) {
+                mountText(vnode, container)
+            }
+        }
+
+        // 挂载文本
+        function mountText(vnode, container) {
+            // 创建一个文本的dom节点
+            const el = document.createTextNode(vnode.text);
+            vnode.el = el;
+            container.appendChild(el);
+        }
+
+        // 挂载元素Vnode
+        function mountElement(vnode, container, refNode) {
+            // 创建一个元素dom节点
+            const el = document.createElement(vnode.tag);
+            vnode.el = el;
+            // 安置属性
+            const data = vnode.data;
+            if (data) {
+                for (let key in data) {
+                    patchData(el, key, null, data[key])
+                }
+            }
+            // 安置子节点
+            const childFlags = vnode.childFlags;
+            const children = vnode.children;
+
+            // 根据子节点的标志位判断下面的程序流程
+            if (childFlags !== childType.EMPTY) {
+                // 有一个
+                if (childFlags == childType.SINGLE) {
+
+
+                    mount(children, el)
+                }
+                // 有多个
+                else if (childFlags == childType.MANY) {
+                    // 有多个就得一个个挂了
+                    children.forEach(ele => {
+                        mount(ele, el)
+                    })
+
+
+                }
+
+            }
+            refNode ? container.insertBefore(el, refNode) : container.appendChild(el);
+        }
+        //创建文本Vnode
+        function createTextVNode(text) {
+            return {
+                flag: vnodeType.TEXT,
+                tag: null,
+                data: null,
+                text,
+                el: null
+            }
+        }
+        // 更新属性
+        function patchData(el, key, prevValue, nextValue) {
+            switch (key) {
+                case "style":
+                    for (let k in nextValue) {
+                        el.style[k] = nextValue[k];
+                    }
+                    // 把原来有的现在没有的抹除
+                    for (let k in prevValue) {
+
+                        if (!nextValue.hasOwnProperty(k)) {
+                            el.style[k] = "";
+                        }
+                    }
+                    break;
+
+                case "class":
+                    el.className = nextValue;
+                    break;
+
+                default:
+                    if (key[0] === "@") {
+                        // 移出旧事件
+                        if (prevValue) {
+                            el.removeEventListener(key.slice(1), prevValue);
+                        }
+                        if (nextValue) {
+                            el.addEventListener(key.slice(1), nextValue);
+                        }
+
+                    } // }再或者是其他属性
+                    else {
+                        el.setAttribute(key, nextValue);
+                    }
+                    break;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        function creatTextNode() {
+
+        }
+
+
+
+
+        // 旧的 VNode
+        const prevVNode = createElement('div', null, [
+            createElement('p', {
+                key: 'a',
+                style: {
+                    color: 'blue'
+                }
+            }, '节点1'),
+            createElement('p', {
+                key: 'b',
+                '@click': () => {
+                    alert('呵呵')
+                }
+            }, '节点2'),
+            createElement('p', {
+                key: 'c'
+            }, '节点3'),
+            createElement('p', {
+                key: 'd'
+            }, '节点4'),
+        ])
+
+        // 新的 VNode
+        const nextVNode = createElement('div', null, [
+            createElement('p', {
+                key: 'd'
+            }, '节点4'),
+            createElement('p', {
+                key: 'a',
+                style: {
+                    color: 'red'
+                }
+            }, '节点1'),
+            createElement('p', {
+                key: 'b',
+                '@click': () => {
+                    alert('哈哈')
+                }
+            }, '节点2'),
+            createElement('p', {
+                key: 'f'
+            }, '节点6'),
+            createElement('p', {
+                key: 'e',
+                class: "item-header"
+            }, '节点5'),
+        ])
+
+        render(prevVNode, document.getElementById('app'))
+
+        // 2秒后更新
+        setTimeout(() => {
+            render(nextVNode, document.getElementById('app'))
+        }, 1000)
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        class MinHeap {
+            constructor() {
+                this.heap = [];
+            }
+
+            //下面三个是工具函数
+            getLeftIndex(index) {
+                return 2 * index + 1;
+            }
+            getRightIndex(index) {
+                return 2 * index + 2;
+            }
+            getParentIndex(index) {
+                if (index === 0) {
+                    return undefined;
+                }
+                return Math.floor((index - 1) / 2);
+            }
+
+            insert(value) {
+                if (value != null) {
+                    this.heap.push(value);
+                    this.upHead(this.heap.length - 1); //上移操作
+                    return true;
+                }
+                return false;
+            }
+
+            //上移
+            upHead(index) {
+                    //拿到父节点
+                    let parent = this.getParentIndex(index);
+                    while (index > 0 && (this.heap[index] < this.heap[parent])) {
+
+                        //进行父子节点交换
+                        this.swap(this.heap, parent, index);
+                        index = parent;
+                        parent = this.getParentIndex(index);
+                    }
+
+                }
+                //交换
+            swap(arr, a, b) {
+                [arr[b], arr[a]] = [arr[a], arr[b]];
+            }
+
+
+
+            extract() {
+                // 空堆
+                if (this.heap.length === 0) {
+                    return false;
+                }
+                // 堆中就一值
+                if (this.heap.length === 1) {
+                    return this.heap.shift();
+                }
+
+                //堆中多值
+                let removeValue = this.heap[0];
+                // 交换堆顶堆底
+                [this.heap[0], this.heap[this.heap.length - 1]] = [this.heap[this.heap.length - 1], this.heap[0]];
+                this.heap.pop();
+
+                //进行堆化
+
+
+                this.sinkDown(0);
+                return removeValue;
+
+            }
+
+            //堆化
+            sinkDown(index) {
+                let element = index;
+                const left = this.getLeftIndex(index);
+                const right = this.getRightIndex(index);
+                const size = this.size();
+                if (left < size && (this.heap[element] > this.heap[left])) {
+                    element = left;
+
+                }
+                if (right < size && this.heap[index] > this.heap[right]) {
+                    element = right;
+                }
+                if (index !== element) {
+                    this.swap(this.heap, index, element);
+
+
+                    this.sinkDown(element);
+                }
+
+            }
+
+
+            size() {
+                return this.heap.length;
+            }
+            isEmpty() {
+                return this.size === 0;
+            }
+            findMin() {
+                return this.heap.length === 0() ? undefined : this.heap[0];
+            }
+
+
+
+        }
+        let heap = new MinHeap();
+
+
+        heap.insert(4);
+        heap.insert(5);
+        heap.insert(1);
+        heap.insert(2);
+        heap.insert(3);
+        heap.extract();
+        console.log(heap);
+    </script>
+
+
+</body>
+
+</html>

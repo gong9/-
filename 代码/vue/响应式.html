@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        let obj = {
+            name: '张三'
+        };
+        let _value;
+        Object.defineProperty(obj, "name", {
+                set(newValue) {
+                    console.log("这里是set");
+                    _value = newValue;
+
+                },
+                get() {
+                    console.log("get被触发了");
+                    return _value;
+                }
+            })
+            //初体验：这种写法有蛮大的问题，1初次访问name属性会是undefined。2是有一个变量暴露了
+    </script>
+
+</body>
+
+</html>

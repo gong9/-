@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        // 这里便需要扩展数组的一些api了
+
+        // 如何扩展函数
+        // 1. 使用一个临时变量保存老函数
+        // 2. 重新定义
+        // 3. 添加扩展方法
+
+        function old() {
+            console.log("这里是老函数的原有功能");
+        }
+        let _tep = old;
+        //相当于两个函数结合了一下
+        old = function() {
+            _tep();
+            console.log("这是扩张的功能");
+
+        }
+
+
+        old();
+    </script>
+</body>
+
+</html>

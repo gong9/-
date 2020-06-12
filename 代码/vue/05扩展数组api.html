@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        // 想要进行扩展的数组api
+        let ARRAY_METHOD = [
+            'push',
+            'pop',
+            'shift',
+            'unshift',
+            'reverse',
+            'sort',
+            'splice',
+        ];
+        let arr = [];
+        let array_methods = Object.create(Array.prototype);
+        ARRAY_METHOD.forEach(method => {
+            array_methods[method] = function() {
+                //拦截操作
+                console.log(`使用了${method}方法`);
+                //老功能
+                let res = Array.prototype[method].apply(this, arguments);
+                return res;
+            }
+        })
+        arr.__proto__ = array_methods;
+    </script>
+</body>
+
+</html>

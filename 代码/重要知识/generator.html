@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        function* helloGenerator() {
+                yield "hello";
+                yield "world";
+                return "ending";
+            }
+            // 它是一个状态机
+            // 也是一个迭代器生成对象
+            // 上面的这个函数有三个状态
+
+        var hw = helloGenerator();
+        // yield是暂停标记
+        // 调用该函数，该函数并不执行而是一个指向内部状态的指针对象
+
+        // 任何一个对象的symbol.iterator方法，等于该对象的遍历器生成函数，调用这个函数就会返回一个该对象的遍历器
+        // 由于generatir本身就是一个迭代器生成函数，因此可以将它给与一个对象的symbol.iterator属相，从而使该对象具有了iterator接口
+
+        var myIterable = {};
+        myIterable[Symbol.iterator] = function*() {
+            yield 1;
+            yield 2;
+            yield 3;
+        };
+        console.log([...myIterable]);
+
+
+        // 运行逻辑：遇到yield表达式，就暂停执行后面的操作，并将紧跟在yield后面那个表达式的值，作为value返回
+        // 下一次调用next的时候继续向下执行，直到遇到下一个yield
+        // 没有再遇到新的yield，就一直到结束，或者直接到return为为止，并且将return语句后面的值最为返回对象的value属性值
+        // 没有遇到return，返回的对象中value属性值为undefind
+
+        function* foo(x) {
+            var y = 2 * (yield(x + 1));
+            var z = yield(y / 3);
+            return (x + y + z);
+        }
+        var a = foo(5);
+
+        function wrapper(generatorFunction) {
+            return function(...args) {
+                let generatorObject = generatorFunction(...args);
+                generatorObject.next();
+                return generatorObject;
+            };
+        }
+        const wrapped = wrapper(function*() {
+            console.log(`First input: ${yield}`);
+            return 'DONE';
+        });
+        wrapped().next('hello!')
+            // First input: hello
+        function* foo() {
+            yield 1;
+            yield 2;
+            yield 3;
+            yield 4;
+            yield 5;
+            return 6;
+        }
+        for (let v of foo()) {
+            console.log(v);
+        }
+
+        //  1 2 3 4 5
+        // 一旦next方法返回对象的done属性为true，for of循环就会终止，且不包含返回给对象。个上面代码中6并没有被打印出来
+
+        // 接下来看yield *表达式
+        // 在一个generator函数内部调用用另一个generator函数默认情况是没有什么效果的
+        function* foo() {
+            yield 'a';
+            yield 'b';
+        }
+
+        function* bar() {
+            yield 'x';
+            foo();
+            yield 'y';
+        }
+        for (let v of bar()) {
+            // console.log(v);
+        }
+        //x,y
+        // 这个时候就需要用到yield * 表达式了
+
+
+
+        function* bar() {
+            yield 'x';
+            yield* foo();
+            yield 'y';
+        }
+
+        function* foo() {
+            yield 'x';
+            yield 'a';
+            yield 'b';
+            yield 'y';
+        }
+        for (let vl of bar()) {
+            console.log(vl);
+        }
+
+        function* inner() {
+            yield 'hello!';
+        }
+
+        function* outer1() {
+            yield 'open';
+            yield inner();
+            yield 'close';
+        }
+        var gen = outer1()
+        gen.next().value // "open"
+        gen.next().value // 返回一个遍历器对象
+        gen.next().value // "close"
+        function* outer2() {
+            yield 'open'
+            yield* inner()
+            yield 'close'
+        }
+        var gen = outer2()
+        gen.next().value // "open"
+        gen.next().value // "hello!"
+        gen.next().value // "close"
+
+        //         从语法角度看， 如果 yield 表达式后面跟的是一个遍历器对象， 需要
+        // 在 yield 表达式后面加上星号， 表明它返回的是一个遍历器对象。 这被称
+        // 为 yield* 表达式。
+
+        let delegatedIterator = (function*() {
+            yield 'Hello!';
+            yield 'Bye!';
+        }());
+        let delegatingIterator = (function*() {
+            yield 'Greetings!';
+            yield* delegatedIterator;
+            yield 'Ok, bye.';
+        }());
+        for (let value of delegatingIterator) {
+            console.log(value);
+        }
+        // "Greetings!
+        // "Hello!"
+        // "Bye!"
+        // "Ok, bye."
+    </script>
+</body>
+
+</html>

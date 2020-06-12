@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        // function check(a, b, c) {
+        //     let that = this;
+        //     let len = arguments.length; //实参的个数
+        //     let rel = that.length;
+        //     console.log(`${len}-----${rel}`);
+
+        // }
+        // console.log(check.length);
+
+
+        // check(1, 2, 3, 4, 5)
+
+        let text = {
+            name: "zhangsan"
+        }
+
+        function text01() {
+            return this.name;
+
+        }
+
+        Function.prototype.myBind = function(obj) {
+            let that = this;
+            return function() {
+                return that.apply(obj)
+            }
+        }
+        console.log(text01.myBind(text)());
+    </script>
+</body>
+
+</html>

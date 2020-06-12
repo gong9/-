@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        let [a, b, c] = [1, 2, 3];
+        //模式匹配
+        let [d, [e],
+            [
+                [r]
+            ]
+        ] = [1, [2],
+            [
+                [4]
+            ]
+        ];
+        //解构不成功即得到的就是uudefind；
+        //不完全解构，即右面数组多也可解构成功
+        // 如果等号右边不是可遍历的解构则解构失败
+        //解构赋值允许指定默认值
+        let [aa, dd = "w"] = [1]
+        //值得注意的是es6内部使用的”===“，即只有那个位置是undefined，才会使用默认值，null、0均不可
+
+
+
+        //对象的解构
+        //数组的元素是按照次序排列的，变量的取值由位置决定。而对象是没有次序的，故变量必须跟属性同名才可取到数据
+        let {
+            aaa,
+            bb
+        } = {
+            aaa: "nihao",
+            bb: 'cc'
+        };
+        //如果我们偏要声明的变量与属性名不一样
+        let {
+            foo: fo
+        } = {
+            foo: 'nihao'
+        }
+        console.log(fo);
+
+        //先找到同名属性，然后再赋予对应变量相应的值，真正被赋值的是后者而不是前者
+        {
+            let {
+                fooo: baz
+            } = {
+                fooo: "aaa",
+                bar: "bbb"
+            };
+            console.log(baz);
+            // "aaa"
+            // console.log(fooo);
+            // error: foo is not defined
+        }
+        //函数参数的解构赋值
+        function add([x, y]) {
+            return x + y;
+        }
+        console.log(add([1, 2]));
+        //函数参数解构也可以使用默认值
+        function move({
+            x = 0,
+            y = 0
+        }) {
+            return x + y;
+        }
+        console.log(move({
+            x: 2,
+            y: 2
+        }));
+        console.log(move({}));
+
+        // 圆括号问题
+        // 解构赋值虽然很方便，但是解析起来并不容易。对于编译器来说，一个式子到底是模式还是表达式，没有办法从一开始就知道的，必须解析到（或解析不到）等号才能知道
+        // 由此带来的问题，如果模式中出现圆括号该怎么处理呢，es6的规则是，只有有可能导致解构的歧义就不得使用圆括号
+        // 但是,这条规则在实际上不那么容易辨别,处理起来相当麻烦.因此,建议只要有可能,就不要在模式中放置圆括号
+
+
+        //那么有哪些情况下是可以使用圆括号的呢
+        // 仅有一种:赋值语句的非模式部分
+        [(b)] = [5];
+
+        console.log(b);
+
+        // 变量的解构赋值的用途
+        //01交换两个变量的值
+        let x = 1;
+        let y = 2;
+        [x, y] = [y, x]
+
+        // 从函数中返回多个值
+        //函数参数的定义
+        //提取json数据
+        //遍历map结构
+        // 任何部署了iterator接口的对象，都可以使用for。。。of循环遍历。map结构原生支持iterator接口，配合变量的解构赋值，获取键名和键值就非常方便
+
+        // 字符串的遍历接口
+        // es6为字符串添加了遍历接口，使得字符串可以被for of遍历到
+        for (let aa of "foo") {
+            console.log(aa);
+
+        }
+        //includes,startsWith,endWith
+        //01 表示是否找到了参数字符串，02表示参数字符串是否在原字符串的头部 03 表示参数字符串是否在原子串的尾部
+        let s = "hello world";
+        console.log(s.startsWith('world'));
+        console.log(s.endsWith('world'));
+        console.log(s.includes("wo"));
+
+        // 同时这三个方法都支持第二个参数，表示开始搜索的位置
+        //注意：endsWith是与其他两个不太相同的
+        // repeat（），返回一个新的字符串，参数表示将原字符串重复多少次，如果是小时会被取整（向下取整），如果是负数无穷会报错
+
+        //字符串补全长度的功能，头部补全和尾部补全
+        //模板字符串
+
+
+        // 数值的扩展
+        // es6将全局parseInt和parseFloat移植到了Number对象上，行为完全保持不变，这样做的目的是逐步减少全局性的方法，使得语言逐步模块化
+        //
+    </script>
+</body>
+
+</html>

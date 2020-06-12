@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        let data = {
+            name: '张三',
+            age: 19,
+            course: [{
+                name: '语文'
+            }, {
+                name: '数学'
+            }, {
+                name: '英语'
+            }, ]
+        };
+
+
+
+
+        function defineReactive(target, key, value, ) {
+            // 情况1： value是对象（非数组）
+            // 判断传过来的value,若是对象递归处理
+            if (value != null && typeof value === 'object' && !Array.isArray(value)) {
+                reactify(value);
+
+            }
+            Object.defineProperty(target, key, {
+                get() {
+                    console.log(`这里是get：${value}`);
+                    return value;
+                },
+                set(newValue) {
+                    console.log("这里是set");
+                    value = newValue;
+
+                }
+            })
+        }
+
+
+        function reactify(o) {
+            let keys = Object.keys(o);
+            for (let i = 0; i < keys.length; i++) {
+                let key = keys[i];
+                let value = o[key];
+                // 判断value的类型
+                if (Array.isArray(value)) {
+
+                    reactify(value);
+                } else {
+                    // 对象或其他简单值类型
+                    defineReactive(o, key, value)
+                }
+            }
+        }
+
+        //现在还有问题，即若数组里面是简单数据类型的数据他还不能转成响应式
+    </script>
+
+</body>
+
+</html>

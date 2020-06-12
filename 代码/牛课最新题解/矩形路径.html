@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        function hasPath(matrix, rows, cols, path) {
+
+            let k;
+            let arr = [...matrix];
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    if (findNext(arr, rows, cols, i, j, path, k = 0)) {
+                        return true;
+                    }
+                }
+
+            }
+            return false;
+
+            function findNext(matrix, rows, cols, x, y, path, k) {
+
+                if (x < 0 || y < 0 || x > rows - 1 || y > cols - 1 || matrix[x * rows + y] == "已占") {
+                    return false;
+                }
+                if (path[k] != matrix[x * cols + y]) {
+
+                    return false;
+                }
+
+                if (k + 1 === path.length) {
+                    return true;
+                }
+                // 占用此坐标
+                matrix[x * rows + y] = "已占"
+                    // 开始向四面去找
+
+                if (findNext(matrix, rows, cols, x - 1, y, path, k + 1)) {
+                    return true
+                }
+                if (findNext(matrix, rows, cols, x, y + 1, path, k + 1)) {
+                    return true
+                }
+                if (findNext(matrix, rows, cols, x + 1, y, path, k + 1)) {
+                    return true
+                }
+                if (findNext(matrix, rows, cols, x, y - 1, path, k + 1)) {
+                    return true
+                }
+
+
+
+
+                return false;
+
+            }
+
+        }
+        console.log(hasPath("ABCEHJIGSFCSLOPQADEEMNOEADIDEJFMVCEIFGGS", 5, 8, "SGGFIECVAASABCEHJIGQEM"));
+    </script>
+</body>
+
+</html>

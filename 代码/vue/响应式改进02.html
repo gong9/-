@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        var o = {
+            name: 'jim',
+            age: 19,
+            gender: '男'
+        };
+        // 用了一下闭包，使用函数作用域进行数据的保护
+        function defineReactive(target, key, value, ) {
+            Object.defineProperty(target, key, {
+                get() {
+                    console.log(`这里是get：${value}`);
+                    return value;
+                },
+                set(newValue) {
+                    console.log("这里是set");
+                    value = newValue;
+
+                }
+            })
+        }
+        // 将上面对象转换成响应式
+        let key = Object.keys(o);
+        for (let i = 0; i < key.length; i++) {
+            defineReactive(o, key[i], o[key[i]])
+
+        }
+
+        // 但是呢一般data中的数据可不止是一级的。
+        // 像是这样：
+        // let o = {
+        //     list: [{}],
+        //     ads: [{}],
+        //     user: {
+
+        //     }
+        // }
+    </script>
+
+</body>
+
+</html>

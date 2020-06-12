@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        class TreeNode {
+            constructor(x) {
+                this.val = x;
+                this.left = null;
+                this.right = null;
+            }
+        }
+
+        function Mirror(root) {
+            // write code here
+            if (root === null) {
+                return null;
+            }
+            let tep;
+
+            //左右子树互换
+            tep = root.left;
+            root.left = root.right;
+            root.right = tep;
+            //转换左子树
+            Mirror(root.left);
+            // 转换右子树
+            Mirror(root.right);
+        }
+        let text = new TreeNode(1);
+        text.left = new TreeNode(3);
+        text.right = new TreeNode(2);
+        Mirror(text);
+        console.log(text);
+    </script>
+</body>
+
+</html>

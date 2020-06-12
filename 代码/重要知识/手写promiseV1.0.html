@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <script>
+        const isFunction = arg => typeof arg === "function";
+        const PENDING = "PENDING";
+        const SUCCESS = "SUCCESS";
+        const FAIL = "FAIL";
+
+        class MyPromise {
+            constructor(handle) {
+                    if (!isFunction(handle)) {
+                        throw new Error("参数必须是一个函数");
+                    }
+                    this._status = PENDING;
+                    this.val = undefined;
+
+                    try {
+                        handle(this._resolve.bind(this), this._reject.bind(this));
+                    } catch (error) {
+                        this._reject(err)
+                    }
+                }
+                //它的作用是干啥的？改变promise的状态，传值
+            _resolve(val) {
+                    if (this._status != PENDING) {
+                        return;
+                    }
+                    this.val = val;
+                    this._status = SUCCESS;
+                }
+                //它的作用是干啥的？改变promise的状态，传值
+            _reject() {
+                if (this._status != PENDING) {
+                    return;
+                }
+                this.val = val;
+                this._status = FAIL;
+            }
+        }
+    </script>
+</body>
+
+</html>
